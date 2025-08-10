@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput as RNTextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput as RNTextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { Icon } from './Icon';
@@ -9,8 +9,14 @@ import { NeonBox } from './NeonBox';
 import { inferFormFromSituation } from '../services/openai';
 import type { DynamicFormSchema } from '../types/form';
 import { FormRenderer } from './FormRenderer';
+import * as DocumentPicker from 'expo-document-picker';
+import { isEditablePdf } from '../utils/pdf';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../App';
+import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t, i18n } = useTranslation();
   const [situation, setSituation] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,8 +27,26 @@ export default function HomeScreen() {
     try {
       const s = await inferFormFromSituation(situation, i18n.language ?? 'en');
       setSchema(s);
+      navigation.navigate('FormFlow', { situation });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handlePickDoc() {
+    const res = await DocumentPicker.getDocumentAsync({
+      type: 'application/pdf',
+      multiple: false,
+    });
+    if (res.canceled || !res.assets?.[0]) return;
+    const asset = res.assets[0];
+    try {
+      const file = await fetch(asset.uri);
+      const buf = new Uint8Array(await file.arrayBuffer());
+      const editable = await isEditablePdf(buf);
+      Alert.alert('PDF detected', editable ? 'Editable PDF form' : 'Flat PDF');
+    } catch (e) {
+      Alert.alert('Error', 'Could not process the selected file.');
     }
   }
 
@@ -72,7 +96,7 @@ export default function HomeScreen() {
           <Text style={{ color: colors.neon, fontFamily: 'Montserrat_600SemiBold' }}>{t('or')}</Text>
         </View>
 
-        <TouchableOpacity style={{ alignItems: 'center', paddingVertical: 12 }}>
+        <TouchableOpacity style={{ alignItems: 'center', paddingVertical: 12 }} onPress={handlePickDoc}>
           <NeonBox style={{ padding: 24, alignItems: 'center', justifyContent: 'center' }}>
             <Icon name="document-scanner" size={64} color={colors.neon} />
           </NeonBox>
@@ -80,7 +104,6 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Bottom Nav */}
       <View
         style={{
           flexDirection: 'row',

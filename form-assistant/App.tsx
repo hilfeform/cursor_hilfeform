@@ -1,28 +1,23 @@
 import React from 'react';
-import { SafeAreaView, ActivityIndicator, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './src/components/HomeScreen';
-import { colors } from './src/theme/colors';
-import { useFonts, Montserrat_400Regular, Montserrat_500Medium, Montserrat_600SemiBold, Montserrat_800ExtraBold } from '@expo-google-fonts/montserrat';
+import FormFlowScreen from './src/screens/FormFlowScreen';
+
+export type RootStackParamList = {
+  Home: undefined;
+  FormFlow: { situation: string };
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
-    Montserrat_400Regular,
-    Montserrat_500Medium,
-    Montserrat_600SemiBold,
-    Montserrat_800ExtraBold,
-  });
-
-  if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={colors.neon} />
-      </View>
-    );
-  }
-
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <HomeScreen />
-    </SafeAreaView>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="FormFlow" component={FormFlowScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
