@@ -45,3 +45,13 @@ export async function saveAndSharePdf(bytes: Uint8Array, filename = 'filled-form
   }
   return fileUri;
 }
+
+export async function extractPdfFieldNames(bytes: Uint8Array): Promise<string[]> {
+  try {
+    const pdfDoc = await PDFDocument.load(bytes);
+    const form = pdfDoc.getForm();
+    return form.getFields().map((f) => f.getName());
+  } catch {
+    return [];
+  }
+}
