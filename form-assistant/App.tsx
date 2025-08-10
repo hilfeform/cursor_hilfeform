@@ -6,7 +6,7 @@ import FormFlowScreen from './src/screens/FormFlowScreen';
 
 export type RootStackParamList = {
   Home: undefined;
-  FormFlow: { situation: string };
+  FormFlow: { situation?: string; pdfUri?: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

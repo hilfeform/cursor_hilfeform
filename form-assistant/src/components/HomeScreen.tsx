@@ -45,6 +45,7 @@ export default function HomeScreen() {
       const buf = new Uint8Array(await file.arrayBuffer());
       const editable = await isEditablePdf(buf);
       Alert.alert('PDF detected', editable ? 'Editable PDF form' : 'Flat PDF');
+      navigation.navigate('FormFlow', { situation: situation || '', pdfUri: asset.uri });
     } catch (e) {
       Alert.alert('Error', 'Could not process the selected file.');
     }
